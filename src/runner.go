@@ -7,19 +7,22 @@ import (
 
 	"github.com/crossphoton/status-cron/src/config"
 	"github.com/crossphoton/status-cron/src/entities"
+	"github.com/crossphoton/status-cron/src/utils"
 	"github.com/gorhill/cronexpr"
 )
 
 // runService runs the services if they pass the cron
-func runService(ct time.Time, service entities.Service, wg sync.WaitGroup) {
+func runService(ct time.Time, service entities.Service, wg *sync.WaitGroup) {
 	if ct == cronexpr.MustParse(service.Cron).Next(ct.Add(-time.Minute)) {
 		a := entities.MapService(service)
 		res := a.Run()
-		entities.DB_instance.SaveResult(res)
+		res.CronTime = ct
 
 		if config.PRINT_RESULT {
-			fmt.Printf("%+v", res)
+			utils.Logger.Info(fmt.Sprintf("%+v", res))
 		}
+
+		entities.DB_instance.SaveResult(res)
 	}
 
 	wg.Done()
@@ -32,7 +35,7 @@ func Runner(ct time.Time) {
 	wg.Add(len(services))
 
 	for _, s := range services {
-		go runService(ct, s, wg)
+		go runService(ct, s, &wg)
 	}
 
 	wg.Wait()

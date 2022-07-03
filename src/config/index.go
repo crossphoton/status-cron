@@ -26,7 +26,7 @@ func init() {
 		DB_TYPE = "postgres"
 	}
 
-	PRINT_RESULT_env := os.Getenv("DB_TYPE")
+	PRINT_RESULT_env := os.Getenv("PRINT_RESULT")
 	if PRINT_RESULT_env == "true" {
 		PRINT_RESULT = true
 	}

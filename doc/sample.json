@@ -1,0 +1,43 @@
+{
+  "services": [
+    {
+      "id": 1,
+      "name": "google website",
+      "url": "https://google.com",
+      "type": "http",
+      "cron": "* * * * *",
+      "data": {
+        "headers": {
+          "Authorization": "Basic user:password"
+        },
+        "method": "GET",
+        "status": 200
+      }
+    },
+    {
+      "id": 2,
+      "name": "cloud redis",
+      "url": "redis://localhost:6379",
+      "type": "redis",
+      "cron": "1 * * * *",
+      "data": { "password": "password", "timeout": 5 }
+    },
+    {
+      "id": 3,
+      "name": "local postgres",
+      "url": "postgres://postgres:password@localhost:5432/?sslmode=disable",
+      "type": "sql",
+      "cron": "1 * * * *",
+      "data": { "driver": "postgres", "timeout": 5 }
+    },
+    {
+      "id": 4,
+      "name": "mongo db",
+      "url": "mongodb://mongo:password@localhost:27017/db",
+      "type": "mongo",
+      "cron": "1 * * * *",
+      "data": { "timeout": 5 }
+    }
+  ],
+  "results": []
+}

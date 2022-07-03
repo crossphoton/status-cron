@@ -13,11 +13,12 @@ import (
 )
 
 type Service struct {
-	Id   int64       `mapstructure:"id" json:"id" gorm:"primaryKey"`
-	Name string      `mapstructure:"name" json:"name"`
-	Url  string      `mapstructure:"url" json:"url"`
-	Type ServiceType `mapstructure:"type" json:"type"`
-	Cron string      `mapstructure:"cron" json:"cron"`
+	Id   int64                  `mapstructure:"id" json:"id" gorm:"primaryKey"`
+	Name string                 `mapstructure:"name" json:"name"`
+	Url  string                 `mapstructure:"url" json:"url"`
+	Type ServiceType            `mapstructure:"type" json:"type"`
+	Cron string                 `mapstructure:"cron" json:"cron"`
+	Data map[string]interface{} `mapstructure:"data" json:"data"`
 }
 
 type DB interface {
@@ -70,15 +71,15 @@ func (db *PostgresDB) GetServices() []Service {
 }
 
 func (db *PostgresDB) SaveResult(res Result) {
-	db.client.Create(res)
+	db.client.Create(&res)
 }
 
 func (db *PostgresDB) Close() {
 }
 
 type JsonFile struct {
-	services []Service
-	results  []Result
+	Services []Service `json:"services"`
+	Results  []Result  `json:"results"`
 }
 
 type JsonDB struct {
@@ -94,16 +95,16 @@ func (db *JsonDB) Connect() {
 		panic(err)
 	}
 
-	json.Unmarshal(file, &db.file)
+	json.Unmarshal(file, &(db.file))
 }
 
 func (db *JsonDB) GetServices() []Service {
-	return db.file.services
+	return db.file.Services
 }
 
 func (db *JsonDB) SaveResult(res Result) {
 	db.lock.Lock()
-	db.file.results = append(db.file.results, res)
+	db.file.Results = append(db.file.Results, res)
 	db.lock.Unlock()
 }
 
