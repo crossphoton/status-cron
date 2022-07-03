@@ -1,7 +1,9 @@
 package entities
 
 import (
+	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -12,13 +14,28 @@ import (
 	"gorm.io/gorm"
 )
 
+type ServiceData map[string]interface{}
+
+func (a *ServiceData) Value() (driver.Value, error) {
+	return json.Marshal(a)
+}
+
+func (a *ServiceData) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+
+	return json.Unmarshal(b, &a)
+}
+
 type Service struct {
-	Id   int64                  `mapstructure:"id" json:"id" gorm:"primaryKey"`
-	Name string                 `mapstructure:"name" json:"name"`
-	Url  string                 `mapstructure:"url" json:"url"`
-	Type ServiceType            `mapstructure:"type" json:"type"`
-	Cron string                 `mapstructure:"cron" json:"cron"`
-	Data map[string]interface{} `mapstructure:"data" json:"data"`
+	Id   int64       `mapstructure:"id" json:"id" gorm:"primaryKey"`
+	Name string      `mapstructure:"name" json:"name"`
+	Url  string      `mapstructure:"url" json:"url"`
+	Type ServiceType `mapstructure:"type" json:"type"`
+	Cron string      `mapstructure:"cron" json:"cron"`
+	Data ServiceData `mapstructure:"data" json:"data"`
 }
 
 type DB interface {

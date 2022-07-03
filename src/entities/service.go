@@ -46,8 +46,13 @@ func (service *HTTPService) Run() (res Result) {
 	res.ServiceId = service.service.Id
 
 	data := service.service.Data
-	if data["status"] == 0 {
-		data["status"] = 200
+	status, ok := data["status"].(float64)
+	if !ok || data["status"] == 0 {
+		status = 200
+	}
+	method, ok := data["method"].(string)
+	if !ok {
+		method = "GET"
 	}
 
 	var body bytes.Buffer
@@ -55,15 +60,18 @@ func (service *HTTPService) Run() (res Result) {
 	enc.Encode(data["body"])
 
 	// Form http request
-	req, err := http.NewRequest(data["method"].(string), service.service.Url, &body)
+	req, err := http.NewRequest(method, service.service.Url, &body)
 	if err != nil {
 		res.Reason = err.Error()
 		return
 	}
 
 	// Add headers
-	for k, v := range data["headers"].(map[string]interface{}) {
-		req.Header.Add(k, v.(string))
+	d, ok := data["headers"].(map[string]interface{})
+	if ok {
+		for k, v := range d {
+			req.Header.Add(k, v.(string))
+		}
 	}
 
 	client := http.Client{}
@@ -76,7 +84,7 @@ func (service *HTTPService) Run() (res Result) {
 		}
 	}
 
-	if resp.StatusCode != int(data["status"].(float64)) {
+	if resp.StatusCode != int(status) {
 		res.Reason = fmt.Sprintf("Got status %d instead.", resp.StatusCode)
 		return
 	}
@@ -112,12 +120,14 @@ func (service *RedisService) Run() (res Result) {
 		res.Reason = err.Error()
 		return res
 	}
-	if data["password"] != "" {
+
+	password, ok := data["password"].(string)
+	if ok && password != "" {
 		options.Password = data["password"].(string)
 	}
 
-	if data["timeout"] != 0 {
-		timeout := data["timeout"].(float64)
+	timeout, ok := data["timeout"].(float64)
+	if ok && timeout != 0 {
 		options.DialTimeout = time.Duration(timeout) * time.Second
 	}
 
@@ -145,7 +155,15 @@ func (service *SQLService) Run() (res Result) {
 
 	data := service.service.Data
 
-	service.client, err = sql.Open(data["driver"].(string), service.service.Url)
+	driver, ok := data["driver"].(string)
+	if !ok {
+		return Result{
+			ServiceId: res.ServiceId,
+			Success:   false,
+			Reason:    "invalid driver",
+		}
+	}
+	service.client, err = sql.Open(driver, service.service.Url)
 	if err != nil {
 		res.Reason = err.Error()
 		return
@@ -173,8 +191,8 @@ func (service *MongoService) Run() (res Result) {
 	data := service.service.Data
 
 	var mongoOptions = options.Client().ApplyURI(service.service.Url)
-	if data["timeout"] != 0 {
-		timeout := data["timeout"].(float64)
+	timeout, ok := data["timeout"].(float64)
+	if ok && timeout != 0 {
 		mongoOptions.SetConnectTimeout(time.Duration(timeout) * time.Second)
 	}
 

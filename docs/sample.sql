@@ -1,10 +1,12 @@
+------ https://crossphoton.github.io/status-cron
+
 CREATE TABLE IF NOT EXISTS services (
 	id SERIAL PRIMARY KEY,
 	name VARCHAR(50),
     cron VARCHAR(50) NOT NULL,
+    data JSONB,
 	url VARCHAR(50) NOT NULL,
-	type VARCHAR(15) NOT NULL,
-    data JSON
+	type VARCHAR(15) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS results (
