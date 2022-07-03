@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS services (
 	name VARCHAR(50),
     cron VARCHAR(50) NOT NULL,
 	url VARCHAR(50) NOT NULL,
-	type VARCHAR(15) NOT NULL
+	type VARCHAR(15) NOT NULL,
+    data JSON
 );
 
 CREATE TABLE IF NOT EXISTS results (
