@@ -4,6 +4,7 @@ Service to build a Status Page
 
 Run a cron with this binary for every minute to build data points
 
+[Download latest version](./status-cron)
 
 ## **Services supported**
 - HTTP
