@@ -19,9 +19,9 @@ Run a cron with this binary for every minute to build data points
 
 ### Config THIS Job
 Services can be fetched from the following modes and can be specified using the env `DB_TYPE`
-- Postgres DB: `postgres`
+<!-- - Postgres DB: `postgres`
   - ENV REQUIRED: `POSTGRES_URI=postgres://localhost:5432/postgres`
-  - See [sample.sql](./sample.sql) to create tables
+  - See [sample.sql](./sample.sql) to create tables -->
 - JSON File: `json`
   - ENV REQUIRED: `JSON_PATH="/home/ec2-user/status-cron/config.json"`
   - See [sample.json](./sample.json) for configuration
