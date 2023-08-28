@@ -1,20 +1,24 @@
 package src
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 
 	"github.com/crossphoton/status-cron/src/config"
 	"github.com/crossphoton/status-cron/src/entities"
 	"github.com/crossphoton/status-cron/src/utils"
+	"github.com/crossphoton/status-cron/src/utils/services"
 	"github.com/gorhill/cronexpr"
 )
 
 // runService runs the services if they pass the cron
 func runService(ct time.Time, service entities.Service, wg *sync.WaitGroup) {
 	if ct == cronexpr.MustParse(service.Cron).Next(ct.Add(-time.Minute)) {
-		a := entities.MapService(service)
+		a := services.MapService(service)
 		res := a.Run()
 		res.CronTime = ct
 
@@ -26,6 +30,53 @@ func runService(ct time.Time, service entities.Service, wg *sync.WaitGroup) {
 	}
 
 	wg.Done()
+}
+
+func gracefulShutdown(wg *sync.WaitGroup) {
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	<-sigint
+
+	ctx := context.Background()
+	go func() {
+		wg.Wait()
+		ctx.Done()
+	}()
+
+	// Wait for pending jobs to complete
+	utils.Logger.Info("shutting down gracefully")
+	ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(config.SHUTDOWN_PERIOD))
+	defer cancel()
+
+	<-ctx.Done()
+
+	utils.Logger.Info("all jobs completed")
+
+	// Close the database connection
+	utils.Logger.Info("closing database connection")
+	entities.DB_instance.Close()
+	utils.Logger.Info("database connection closed")
+
+	// Shutdown with exit code 1
+	os.Exit(1)
+}
+
+func StaticServerRunner(ct time.Time) {
+	wg := new(sync.WaitGroup)
+	var next time.Time = ct
+
+	// Graceful Shutdown
+	go gracefulShutdown(wg)
+
+	for {
+		ct = next
+		next = ct.Add(time.Minute)
+		wg.Add(1)
+		go func() {
+			Runner(ct)
+			wg.Done()
+		}()
+	}
 }
 
 // Runner runs the job

@@ -1,0 +1,33 @@
+.center {
+    align-items: center;
+}
+
+.header {
+  width: 100vw;
+  height: 10vh;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.verticalFlex {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cardContainer {
+  width: 80vw;
+  padding: 20px;
+  display: flex;
+  background: rgba(255, 255, 255, 0.134);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(60px);
+  -webkit-backdrop-filter: blur(60px);
+}
+
+.cardContainer * {
+    padding: 10px;
+}

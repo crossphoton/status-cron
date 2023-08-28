@@ -29,15 +29,6 @@ func (a *ServiceData) Scan(value interface{}) error {
 	return json.Unmarshal(b, &a)
 }
 
-type Service struct {
-	Id   int64       `mapstructure:"id" json:"id" gorm:"primaryKey"`
-	Name string      `mapstructure:"name" json:"name"`
-	Url  string      `mapstructure:"url" json:"url"`
-	Type ServiceType `mapstructure:"type" json:"type"`
-	Cron string      `mapstructure:"cron" json:"cron"`
-	Data ServiceData `mapstructure:"data" json:"data"`
-}
-
 type DB interface {
 	Connect()
 	GetServices() []Service
